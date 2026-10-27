@@ -66,14 +66,7 @@ fn main() -> ExitCode {
                     r.openat_asymmetry,
                     r.rows.len()
                 );
-                if r.openat_asymmetry == 0.0
-                    && r.rows.iter().all(|row| {
-                        row.both_denied()
-                            || row.syscall == landlock_uring_asymmetry::Outcome::Denied
-                    })
-                {
-                    ExitCode::SUCCESS
-                } else if r.openat_asymmetry == 0.0 {
+                if r.openat_asymmetry == 0.0 {
                     ExitCode::SUCCESS
                 } else {
                     ExitCode::from(1)
