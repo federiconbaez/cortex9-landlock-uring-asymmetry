@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    name: unit (fmt + clippy + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test --workspace
+
+  enforce:
+    name: enforce (IOCTL_DEV vs URING_CMD control-positive)
+    runs-on: ubuntu-latest
+    # Sin continue-on-error: falla si no hay device con uring_cmd.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - name: show env
+        run: uname -a; ls -l /dev/loop0 /dev/nvme* 2>/dev/null || true
+      - name: control-positive (fail hard if unsupported)
+        run: cargo run --bin landlock-uring-enforce -- /dev/loop0

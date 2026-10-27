@@ -1,0 +1,31 @@
+[package]
+name = "landlock-uring-asymmetry"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "Differential harness: Landlock via syscall vs io_uring (OPENAT, URING_CMD/IOCTL_DEV)"
+repository = "https://github.com/federiconbaez/cortex9-landlock-uring-asymmetry"
+keywords = ["landlock", "io_uring", "sandbox", "security", "linux"]
+categories = ["command-line-utilities", "os::linux-apis"]
+authors = ["Federico Nicolas Báez Rizzo"]
+default-run = "landlock-uring-asymmetry"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+libc = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+
+[[bin]]
+name = "landlock-uring-asymmetry"
+path = "src/main.rs"
+
+[[bin]]
+name = "landlock-uring-enforce"
+path = "src/bin/landlock-uring-enforce.rs"
+
+[lib]
+name = "landlock_uring_asymmetry"
+path = "src/lib.rs"
