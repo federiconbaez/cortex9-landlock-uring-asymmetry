@@ -12,6 +12,7 @@ jobs:
   enforce:
     name: enforce (IOCTL_DEV vs URING_CMD control positivo)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -19,5 +20,7 @@ jobs:
           toolchain: stable
       - name: kernel
         run: uname -a; cat /proc/sys/kernel/osrelease
-      - name: enforce (falla fuerte si no está soportado)
-        run: cargo run --bin landlock-uring-enforce -- /dev/loop0
+      - name: build
+        run: cargo build --bin landlock-uring-enforce
+      - name: enforce (falla fuerte si no está soportado; timeout 120 s)
+        run: timeout 120 cargo run --bin landlock-uring-enforce -- /dev/loop0

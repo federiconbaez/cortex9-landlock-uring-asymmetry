@@ -56,7 +56,7 @@ si se observa el control positivo (`syscall=Denied`, `uring=Ok`). El workflow
 ## CI
 
 - `.github/workflows/ci.yml`: fmt + `clippy -D warnings` + `cargo test` + reproducción de la medición. Tiene que quedar verde.
-- `.github/workflows/enforce.yml`: corre `cargo run --bin landlock-uring-enforce -- /dev/loop0` de verdad en el runner, sin `continue-on-error` ni `#[ignore]`. Si el runner no expone un device con `uring_cmd` accesible (o Landlock), queda **rojo** (exit 2): resultado esperado, no un skip.
+- `.github/workflows/enforce.yml`: corre `cargo run --bin landlock-uring-enforce -- /dev/loop0` de verdad en el runner, sin `continue-on-error` ni `#[ignore]`. El paso está envuelto en `timeout 120`: en el primer run sobre `ubuntu-24.04` (kernel `7.0.0-1017-azure`) el binario quedó bloqueado en `/dev/loop0` más de 7 minutos sin imprimir resultado y hubo que cancelarlo. Si vuelve a pasar, el job falla con exit 124; un bloqueo no se cuenta como resultado. Si el runner no expone un device con `uring_cmd` accesible (o Landlock), queda **rojo** (exit 2): resultado esperado, no un skip.
 
 ## Fuentes leídas / Sources read
 
