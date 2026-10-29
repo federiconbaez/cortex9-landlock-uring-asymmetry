@@ -7,7 +7,7 @@ on:
 
 jobs:
   unit:
-    name: unit (fmt + clippy + test)
+    name: fmt + clippy + test + medición
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,20 +15,13 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
-      - run: cargo fmt --all -- --check
-      - run: cargo clippy --all-targets -- -D warnings
-      - run: cargo test --workspace
-
-  enforce:
-    name: enforce (IOCTL_DEV vs URING_CMD control-positive)
-    runs-on: ubuntu-latest
-    # Sin continue-on-error: falla si no hay device con uring_cmd.
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-      - name: show env
-        run: uname -a; ls -l /dev/loop0 /dev/nvme* 2>/dev/null || true
-      - name: control-positive (fail hard if unsupported)
-        run: cargo run --bin landlock-uring-enforce -- /dev/loop0
+      - name: kernel
+        run: uname -a
+      - name: fmt
+        run: cargo fmt --all -- --check
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: test
+        run: cargo test --workspace
+      - name: reproducir medición (1)
+        run: cargo run --quiet -- openat --workspace /tmp/ll-uring-ws

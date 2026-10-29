@@ -1,0 +1,23 @@
+name: enforce
+
+# Enforcement real en el kernel del runner. Separado de ci.yml a propósito:
+# sin continue-on-error ni #[ignore]; si el kernel no soporta la feature,
+# el binario sale con exit != 0 y este workflow queda rojo de forma visible.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  enforce:
+    name: enforce (IOCTL_DEV vs URING_CMD control positivo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - name: kernel
+        run: uname -a; cat /proc/sys/kernel/osrelease
+      - name: enforce (falla fuerte si no está soportado)
+        run: cargo run --bin landlock-uring-enforce -- /dev/loop0

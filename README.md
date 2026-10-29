@@ -22,6 +22,11 @@ pide tests desde 2024.
 | OPENAT path-deny: syscall vs `IORING_OP_OPENAT` | **medido** → asimetría 0 |
 | IOCTL_DEV vs `IORING_OP_URING_CMD` control positivo | **no** en `/dev/zero` (uring_cmd → Unsupported); binario `landlock-uring-enforce` **falla fuerte** (exit 2) |
 
+> **El control positivo IOCTL × `uring_cmd` NO está probado.** No se observó
+> en ningún entorno que `IORING_OP_URING_CMD` evite `LANDLOCK_ACCESS_FS_IOCTL_DEV`;
+> lo único medido es OPENAT (asimetría 0). *The IOCTL × uring_cmd positive
+> control is NOT tested.*
+
 ## Medición / Measurement
 
 ```bash
@@ -45,8 +50,13 @@ cargo run --bin landlock-uring-enforce -- /dev/loop0
 ```
 
 Exit 2 si el device no implementa `uring_cmd` o Landlock no está. Exit 0 solo
-si se observa el control positivo (`syscall=Denied`, `uring=Ok`). El job CI
-`enforce` no tiene `continue-on-error`.
+si se observa el control positivo (`syscall=Denied`, `uring=Ok`). El workflow
+`enforce.yml` no tiene `continue-on-error`.
+
+## CI
+
+- `.github/workflows/ci.yml`: fmt + `clippy -D warnings` + `cargo test` + reproducción de la medición. Tiene que quedar verde.
+- `.github/workflows/enforce.yml`: corre `cargo run --bin landlock-uring-enforce -- /dev/loop0` de verdad en el runner, sin `continue-on-error` ni `#[ignore]`. Si el runner no expone un device con `uring_cmd` accesible (o Landlock), queda **rojo** (exit 2): resultado esperado, no un skip.
 
 ## Fuentes leídas / Sources read
 
